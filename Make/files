@@ -1,0 +1,3 @@
+cloudInfo/cloudInfo.C
+
+LIB = $(FOAM_USER_LIBBIN)/liblagrangianFunctionObjects
