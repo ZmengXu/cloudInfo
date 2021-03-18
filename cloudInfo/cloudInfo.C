@@ -26,29 +26,10 @@ License
 #include "cloudInfo.H"
 #include "dictionary.H"
 #include "PstreamReduceOps.H"
-#include "addToRunTimeSelectionTable.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace functionObjects
-{
-    defineTypeNameAndDebug(cloudInfo, 0);
-
-    addToRunTimeSelectionTable
-    (
-        functionObject,
-        cloudInfo,
-        dictionary
-    );
-}
-}
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::functionObjects::cloudInfo::writeFileHeader(const label i)
+template<class CloudType>
+void Foam::functionObjects::cloudInfo<CloudType>::writeFileHeader(const label i)
 {
     writeHeader(file(), "Cloud information");
     writeCommented(file(), "Time");
@@ -60,8 +41,8 @@ void Foam::functionObjects::cloudInfo::writeFileHeader(const label i)
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::cloudInfo::cloudInfo
+template<class CloudType>
+Foam::functionObjects::cloudInfo<CloudType>::cloudInfo
 (
     const word& name,
     const Time& runTime,
@@ -78,14 +59,14 @@ Foam::functionObjects::cloudInfo::cloudInfo
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::cloudInfo::~cloudInfo()
+template<class CloudType>
+Foam::functionObjects::cloudInfo<CloudType>::~cloudInfo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
+template<class CloudType>
+bool Foam::functionObjects::cloudInfo<CloudType>::read(const dictionary& dict)
 {
     regionFunctionObject::read(dict);
 
@@ -109,14 +90,14 @@ bool Foam::functionObjects::cloudInfo::read(const dictionary& dict)
     return true;
 }
 
-
-bool Foam::functionObjects::cloudInfo::execute()
+template<class CloudType>
+bool Foam::functionObjects::cloudInfo<CloudType>::execute()
 {
     return true;
 }
 
-
-bool Foam::functionObjects::cloudInfo::write()
+template<class CloudType>
+bool Foam::functionObjects::cloudInfo<CloudType>::write()
 {
     logFiles::write();
 
@@ -124,8 +105,8 @@ bool Foam::functionObjects::cloudInfo::write()
     {
         const word& cloudName = names()[i];
 
-        const Cloud<basicReactingMultiphaseParcel>& cloud =
-            obr_.lookupObject<Cloud<basicReactingMultiphaseParcel>>(cloudName);
+        const CloudType& cloud =
+            obr_.lookupObject<CloudType>(cloudName);
         label nParcels = returnReduce(cloud.size(), sumOp<label>());
         scalar mass = massInSystem(cloud);
 
@@ -145,18 +126,19 @@ bool Foam::functionObjects::cloudInfo::write()
     return true;
 }
 
-Foam::scalar Foam::functionObjects::cloudInfo::massInSystem
+template<class CloudType>
+Foam::scalar Foam::functionObjects::cloudInfo<CloudType>::massInSystem
 (
-    const Cloud<basicReactingMultiphaseParcel>& cloud
+    const CloudType& cloud
 ) const
 {
 
     label i = 0;
     scalar mSum = 0.0;
 
-    forAllConstIter(Cloud<basicReactingMultiphaseParcel>, cloud, iter)
+    forAllConstIter(typename CloudType, cloud, iter)
     {
-        const basicReactingMultiphaseParcel& p = iter();
+        const typename CloudType::particleType& p = iter();
         scalar m = p.nParticle()*p.mass();
         mSum += m;
         i++;
@@ -168,10 +150,10 @@ Foam::scalar Foam::functionObjects::cloudInfo::massInSystem
     return mSum;
 }
 
-
-Foam::scalar Foam::functionObjects::cloudInfo::penetration
+template<class CloudType>
+Foam::scalar Foam::functionObjects::cloudInfo<CloudType>::penetration
 (
-    const Cloud<basicReactingMultiphaseParcel>& cloud,
+    const CloudType& cloud,
     const vector position0,
     const scalar fraction
 ) const
@@ -208,9 +190,9 @@ Foam::scalar Foam::functionObjects::cloudInfo::penetration
     label i = 0;
     scalar mSum = 0.0;
 
-    forAllConstIter(Cloud<basicReactingMultiphaseParcel>, cloud, iter)
+    forAllConstIter(typename CloudType, cloud, iter)
     {
-        const basicReactingMultiphaseParcel& p = iter();
+        const typename CloudType::particleType& p = iter();
         scalar m = p.nParticle()*p.mass();
         scalar d = mag(p.position() - position0);
         mSum += m;

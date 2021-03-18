@@ -25,55 +25,25 @@ Class
     Foam::functionObjects::cloudInfo
 
 Description
+    Refer to $FOAM_SRC/functionObjects/lagrangian/cloudInfo
     Outputs Lagrangian cloud information to a file.
 
     The current outputs include:
     - total current number of parcels
     - total current mass of parcels
-
-    Example of function object specification:
-    \verbatim
-    cloudInfo1
-    {
-        type        cloudInfo;
-        libs        ("libcloudFunctionObjects.so");
-        ...
-        clouds
-        (
-            kinematicCloud1
-            thermoCloud1
-        );
-    }
-    \endverbatim
-
-
-Usage
-    \table
-        Property     | Description             | Required    | Default value
-        type         | type name: cloudInfo    | yes         |
-        clouds       | list of clouds names to process |yes  |
-    \endtable
-
-    The output data of each cloud is written to a file named \<cloudName\>.dat
-
-See also
-    Foam::functionObject
-    Foam::functionObjects::regionFunctionObject
-    Foam::functionObjects::logFiles
-
-SourceFiles
-    cloudInfo.C
+    - penetration length
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_cloudInfo_H
-#define functionObjects_cloudInfo_H
+#ifndef functionObjects_cloudInfos_H
+#define functionObjects_cloudInfos_H
 
 #include "regionFunctionObject.H"
 #include "logFiles.H"
+#include "vector.H"
+
 #include "Cloud.H"
 #include "KinematicCloud.H"
-#include "basicReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +55,7 @@ namespace functionObjects
 /*---------------------------------------------------------------------------*\
                          Class cloudInfo Declaration
 \*---------------------------------------------------------------------------*/
-
+template<class CloudType>
 class cloudInfo
 :
     public regionFunctionObject,
@@ -137,9 +107,9 @@ public:
 
         // Check
         //- Total mass in the system
-        scalar massInSystem(const Cloud<basicReactingMultiphaseParcel>& cloud) const;
+        scalar massInSystem(const CloudType& cloud) const;
         //- Penetration for fraction [0-1] of the current total mass
-        scalar penetration(const Cloud<basicReactingMultiphaseParcel>& cloud, const vector position0, const scalar fraction) const;
+        scalar penetration(const CloudType& cloud, const vector position0, const scalar fraction) const;
 
     // Member Operators
 
@@ -150,8 +120,14 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 } // End namespace functionObjects
 } // End namespace Foam
+
+#ifdef NoRepository
+    #include "cloudInfo.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
