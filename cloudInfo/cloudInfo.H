@@ -38,8 +38,8 @@ Description
 #ifndef functionObjects_cloudInfos_H
 #define functionObjects_cloudInfos_H
 
-#include "regionFunctionObject.H"
-#include "logFiles.H"
+//#include "regionFunctionObject.H"
+#include "writeFiles.H"
 #include "vector.H"
 
 #include "Cloud.H"
@@ -58,8 +58,8 @@ namespace functionObjects
 template<class CloudType>
 class cloudInfo
 :
-    public regionFunctionObject,
-    public logFiles
+//    public regionFunctionObject,
+    public writeFiles
 {
 protected:
 

@@ -49,8 +49,8 @@ Foam::functionObjects::cloudInfo<CloudType>::cloudInfo
     const dictionary& dict
 )
 :
-    regionFunctionObject(name, runTime, dict),
-    logFiles(obr_, name),
+//    regionFunctionObject(name, runTime, dict),
+    writeFiles(name, runTime, dict, name),
     position_(dict.lookup("position")),
     fraction_(readScalar(dict.lookup("penetration")))
 {
@@ -68,9 +68,9 @@ Foam::functionObjects::cloudInfo<CloudType>::~cloudInfo()
 template<class CloudType>
 bool Foam::functionObjects::cloudInfo<CloudType>::read(const dictionary& dict)
 {
-    regionFunctionObject::read(dict);
+//    regionFunctionObject::read(dict);
 
-    logFiles::resetNames(dict.lookup("clouds"));
+    writeFiles::resetNames(dict.lookup("clouds"));
 
     Info<< type() << " " << name() << ": ";
     if (names().size())
@@ -99,7 +99,7 @@ bool Foam::functionObjects::cloudInfo<CloudType>::execute()
 template<class CloudType>
 bool Foam::functionObjects::cloudInfo<CloudType>::write()
 {
-    logFiles::write();
+    writeFiles::write();
 
     forAll(names(), i)
     {
