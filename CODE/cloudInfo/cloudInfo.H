@@ -65,6 +65,7 @@ protected:
 
     // Protected Member Functions
         vector  position_;
+        vector direction_;
         scalar fraction_;
         //- File header information
         virtual void writeFileHeader(const label i);
@@ -110,6 +111,8 @@ public:
         scalar massInSystem(const CloudType& cloud) const;
         //- Penetration for fraction [0-1] of the current total mass
         scalar penetration(const CloudType& cloud, const vector position0, const scalar fraction) const;
+        //- spray angle for fraction [0-1] of the current total mass
+        scalar sprayAngle(const CloudType& cloud, const vector position0, const vector direction0, const scalar fraction) const;
 
     // Member Operators
 
