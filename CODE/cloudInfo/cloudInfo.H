@@ -114,6 +114,9 @@ public:
         //- spray angle for fraction [0-1] of the current total mass
         scalar sprayAngle(const CloudType& cloud, const vector position0, const vector direction0, const scalar fraction) const;
 
+        scalar Dij(const CloudType& cloud, const label i, const label j) const;
+
+        scalar Dmax(const CloudType& cloud) const;
     // Member Operators
 
         //- Disallow default bitwise assignment

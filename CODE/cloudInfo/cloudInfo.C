@@ -35,6 +35,8 @@ void Foam::functionObjects::cloudInfo<CloudType>::writeFileHeader(const label i)
     writeCommented(file(), "Time");
     writeTabbed(file(), "nParcels");
     writeTabbed(file(), "massInSystem");
+    writeTabbed(file(), "D32");
+    writeTabbed(file(), "Dmax");
     writeTabbed(file(), "penetration");
     writeTabbed(file(), "sprayAngle");
     file() << endl;
@@ -112,6 +114,10 @@ bool Foam::functionObjects::cloudInfo<CloudType>::write()
         label nParcels = returnReduce(cloud.size(), sumOp<label>());
         scalar mass = massInSystem(cloud);
 
+        scalar d32 = Dij(cloud, 3, 2);
+
+        scalar dmax = Dmax(cloud);
+
         scalar pen = penetration(cloud, position_, fraction_);
 
         scalar ang = sprayAngle(cloud, position_, direction_, fraction_);
@@ -123,6 +129,8 @@ bool Foam::functionObjects::cloudInfo<CloudType>::write()
                 << tab
                 << nParcels << tab
                 << mass << tab
+                << d32 << tab
+                << dmax << tab
                 << pen << tab
                 << ang << endl;
         }
@@ -442,4 +450,53 @@ Foam::scalar Foam::functionObjects::cloudInfo<CloudType>::sprayAngle
     return distance;
 
 }
+
+template<class CloudType>
+Foam::scalar Foam::functionObjects::cloudInfo<CloudType>::Dij
+(
+    const CloudType& cloud,
+    const label i,
+    const label j
+) const
+{
+    scalar si = 0.0;
+    scalar sj = 0.0;
+    label ipart = 0;    
+    forAllConstIter(typename CloudType, cloud, iter)
+    {
+        const typename CloudType::particleType& p = iter();
+        si += p.nParticle()*pow(p.d(), i);
+        sj += p.nParticle()*pow(p.d(), j);
+        ipart++;
+    }
+
+    reduce(si, sumOp<scalar>());
+    reduce(sj, sumOp<scalar>());
+    sj = max(sj, vSmall);
+
+    return si/sj;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::functionObjects::cloudInfo<CloudType>::Dmax
+(
+    const CloudType& cloud
+) const
+{
+    scalar d = -great;
+    label ipart = 0;
+    forAllConstIter(typename CloudType, cloud, iter)
+    {
+        const typename CloudType::particleType& p = iter();
+        d = max(d, p.d());
+        ipart++;
+    }
+
+    reduce(d, maxOp<scalar>());
+
+    return max(0.0, d);
+}
+
+
 // ************************************************************************* //
